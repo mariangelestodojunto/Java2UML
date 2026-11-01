@@ -59,9 +59,13 @@ public final class RelationDetector {
     private final BiFunction<TypeInfo, String, UmlClassifier> targetProvider;
 
     private final Map<String, UmlRelation> relations = new LinkedHashMap<>();
+    /** Código fuente de cada tipo, para leer las marcas de multiplicidad. */
+    private final java.util.function.Function<TypeDeclaration<?>, com.umlgen.parser.ParsedSource> sourceOf;
 
     public RelationDetector(TypeReferenceResolver resolver, DiagramOptions options, AnalysisReport report,
-                            BiFunction<TypeInfo, String, UmlClassifier> targetProvider) {
+                            BiFunction<TypeInfo, String, UmlClassifier> targetProvider,
+                            java.util.function.Function<TypeDeclaration<?>, com.umlgen.parser.ParsedSource> sourceOf) {
+        this.sourceOf = sourceOf;
         this.resolver = resolver;
         this.usage = new TypeUsageAnalyzer(resolver);
         this.options = options;
@@ -133,7 +137,9 @@ public final class RelationDetector {
                     continue;
                 }
                 String role = field.visibility.symbol() + " " + field.name; // p. ej. "- vehiculo"
-                String multiplicity = use.multiplicity() != null ? use.multiplicity()
+                // la multiplicidad indicada en el código (// 1, // 0..1, // *) tiene prioridad sobre la regla automática
+                String multiplicity = field.declaredMultiplicity != null ? field.declaredMultiplicity
+                        : use.multiplicity() != null ? use.multiplicity()
                         : field.required ? "1" : "0..1";
                 add(new UmlRelation(RelationKind.ASSOCIATION, source, target, role, multiplicity,
                         "atributo " + where));
@@ -318,14 +324,21 @@ public final class RelationDetector {
     // ---------------------------------------------------------------- atributos (incluye records)
 
     /** @param required la referencia nunca queda en null (ver {@link #isRequired}): multiplicidad 1; si no, 0..1. */
-    private record FieldSpec(String name, Type type, Visibility visibility, boolean required) {
+    private record FieldSpec(String name, Type type, Visibility visibility, boolean required,
+                             String declaredMultiplicity) {
     }
 
     /**
-     * Una referencia simple es obligatoria (multiplicidad 1) si se inicializa al declararla
-     * o en algún constructor con un valor distinto de null. Un setter convencional no la
-     * vuelve opcional por sí solo: se asume que respeta el contrato de no asignar null.
-     * Otros métodos que la modifican sí hacen que se considere opcional (0..1).
+     * Una referencia simple es
+     * obligatoria (multiplicidad 1) cuando se fija al construir el objeto y después no cambia:
+     * <ul>
+     *   <li>es final, o</li>
+     *   <li>se inicializa con un valor al declararla o se le asigna un valor distinto de null en algún
+     *       constructor (aunque venga por parámetro), <b>y</b> ningún método la vuelve a asignar.</li>
+     * </ul>
+     * Si no se asigna en ningún constructor, o si un método la modifica (un setter, agregarX/quitarX...),
+     * es opcional: 0..1. Ejemplos: fechaFabricacion → 1; fechaNacimiento (tiene
+     * setFechaNacimiento), fechaUltimaVTV y vehiculo → 0..1.
      */
     static boolean isRequired(TypeDeclaration<?> td, FieldDeclaration fd, VariableDeclarator var) {
         if (fd.isFinal()) {
@@ -349,7 +362,7 @@ public final class RelationDetector {
                         "set" + Character.toUpperCase(name.charAt(0)) + name.substring(1))
                         && method.getParameters().size() == 1;
 
-                // Un setter no vuelve opcional un atributo inicializado obligatoriamente.
+                // Un setter convencional no vuelve opcional un atributo inicializado en el constructor.
                 if (!isSetter || !setAtConstruction) {
                     return false;
                 }
@@ -385,13 +398,15 @@ public final class RelationDetector {
     }
 
     @SuppressWarnings("unchecked")
-    private static List<FieldSpec> fieldsOf(TypeDeclaration<?> td) {
+    private List<FieldSpec> fieldsOf(TypeDeclaration<?> td) {
+        com.umlgen.parser.ParsedSource source = sourceOf.apply(td);
         List<FieldSpec> result = new ArrayList<>();
         boolean inInterface = td instanceof ClassOrInterfaceDeclaration cid && cid.isInterface();
         if (td.getClass().getSimpleName().equals("RecordDeclaration")) {
             try {
                 for (Parameter p : (NodeList<Parameter>) td.getClass().getMethod("getParameters").invoke(td)) {
-                    result.add(new FieldSpec(p.getNameAsString(), p.getType(), Visibility.PRIVATE, false));
+                    result.add(new FieldSpec(p.getNameAsString(), p.getType(), Visibility.PRIVATE, false,
+                            source == null ? null : source.declaredMultiplicity(p)));
                 }
             } catch (ReflectiveOperationException | ClassCastException ignored) {
                 // sin soporte de records
@@ -401,7 +416,8 @@ public final class RelationDetector {
             if (member instanceof FieldDeclaration fd) {
                 Visibility v = ClassifierFactory.visibility(fd.getModifiers(), inInterface, false);
                 for (VariableDeclarator var : fd.getVariables()) {
-                    result.add(new FieldSpec(var.getNameAsString(), var.getType(), v, isRequired(td, fd, var)));
+                    result.add(new FieldSpec(var.getNameAsString(), var.getType(), v, isRequired(td, fd, var),
+                            source == null ? null : source.declaredMultiplicity(fd)));
                 }
             }
         }
