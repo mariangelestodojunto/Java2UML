@@ -97,7 +97,8 @@ public final class ModelBuilder {
     /**
      * Clase de servicio (p. ej. PlantaVTV): opera sobre otras clases que recibe por parámetro, pero no
      * guarda referencias a ellas ni las demás clases la referencian. Es decir: tiene al menos una dependencia
-     * saliente y ninguna otra relación (ni asociaciones, ni herencia, ni relaciones entrantes).
+     * saliente hacia una clase que no es enum y ninguna otra relación (ni asociaciones, ni herencia, ni
+     * relaciones entrantes).
      */
     static void markServiceClasses(UmlModel model) {
         for (UmlClassifier c : model.classifiers()) {
@@ -108,7 +109,10 @@ public final class ModelBuilder {
                     other = true;
                 } else if (r.source() == c) {
                     if (r.kind() == RelationKind.DEPENDENCY) {
-                        usesOthers = true;
+                        // usar sólo enums (p. ej. devolver un ResultadoCombate) no la convierte en servicio
+                        if (!r.target().isEnum()) {
+                            usesOthers = true;
+                        }
                     } else {
                         other = true;
                     }

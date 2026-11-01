@@ -120,6 +120,27 @@ class UxfGenerationTest {
         assertTrue(f.text(TestSupport.classifier(d, "Fecha")).contains("+ Fecha(int, int, int)"));
     }
 
+    @Test
+    void usarSoloUnEnumNoConvierteEnServicio() throws Exception {
+        java.nio.file.Path dir = java.nio.file.Files.createTempDirectory("servicio");
+        java.nio.file.Path p = java.nio.file.Files.createDirectories(dir.resolve("src/juego"));
+        java.nio.file.Files.writeString(p.resolve("Resultado.java"), "package juego; public enum Resultado { GANA, PIERDE }");
+        java.nio.file.Files.writeString(p.resolve("Jugador.java"), String.join("\n",
+                "package juego;",
+                "public class Jugador {",
+                "  private int puntos;",
+                "  public Jugador(int puntos) { this.puntos = puntos; }",
+                "  public Resultado competir(Jugador otro) { return puntos > otro.puntos ? Resultado.GANA : Resultado.PIERDE; }",
+                "}"));
+        DiagramOptions o = new DiagramOptions();
+        o.showMethods = true;
+        o.showConstructors = true;
+        GeneratedDiagram d = TestSupport.generate(dir, "juego", o);
+        String jugador = new PanelTextFormatter(o).text(TestSupport.classifier(d, "Jugador"));
+        assertTrue(jugador.contains("+ Jugador(int)"), "el constructor debe mostrarse: " + jugador);
+        assertTrue(TestSupport.relations(d).contains("DEPENDENCY Jugador->Resultado"));
+    }
+
     /** Disposición 2D: Agenda | Persona | Fecha arriba; Vehiculo y PlantaVTV debajo. */
     @Test
     void disposicionEnCuadricula() throws Exception {
