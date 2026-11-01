@@ -1,0 +1,9 @@
+# Blueprint de Render: New → Blueprint → elegí este repositorio.
+services:
+  - type: web
+    name: java2uml
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /salud
+    autoDeploy: true

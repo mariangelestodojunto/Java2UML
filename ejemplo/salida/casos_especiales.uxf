@@ -1,0 +1,56 @@
+<diagram program="umletino" version="15.1"><zoom_level>10</zoom_level><element><id>UMLClass</id><coordinates><x>20</x><y>780</y><w>120</w><h>80</h></coordinates><panel_attributes>Factura
+--
+- items: List
+- fecha: Date
+--</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>20</x><y>400</y><w>130</w><h>70</h></coordinates><panel_attributes>Cliente
+--
+- nombre: String
+--</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>340</x><y>590</y><w>140</w><h>90</h></coordinates><panel_attributes>&lt;&lt;enum&gt;&gt;
+Cliente.Categoria
+--
+_+ COMUN_
+_+ PREMIUM_</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>210</x><y>780</y><w>120</w><h>70</h></coordinates><panel_attributes>Nodo&lt;E&gt;
+--
+- dato: E
+--</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>30</x><y>210</y><w>120</w><h>50</h></coordinates><panel_attributes>RepoClientes
+--
+--</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>660</x><y>380</y><w>160</w><h>100</h></coordinates><panel_attributes>Item
+--
+- producto: Producto
+- cantidad: int
+_- contador: int_
+--</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>350</x><y>20</y><w>120</w><h>70</h></coordinates><panel_attributes>&lt;&lt;interface&gt;&gt;
+Pagable
+--
+--</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>280</x><y>400</y><w>250</w><h>70</h></coordinates><panel_attributes>Pedido
+--
+- proveedorDeItems: Supplier&lt;Item&gt;
+--</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>30</x><y>600</y><w>120</w><h>80</h></coordinates><panel_attributes>Direccion
+--
+- calle: String
+- numero: int
+--</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>350</x><y>200</y><w>120</w><h>70</h></coordinates><panel_attributes>&lt;&lt;interface&gt;&gt;
+Auditable
+--
+--</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>30</x><y>20</y><w>120</w><h>70</h></coordinates><panel_attributes>&lt;&lt;interface&gt;&gt;
+Repositorio&lt;T&gt;
+--
+--</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>400</x><y>80</y><w>20</w><h>130</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>10;10;10;120</additional_attributes></element><element><id>Relation</id><coordinates><x>80</x><y>80</y><w>20</w><h>140</h></coordinates><panel_attributes>lt=&lt;.</panel_attributes><additional_attributes>10;10;10;130</additional_attributes></element><element><id>Relation</id><coordinates><x>396</x><y>260</y><w>23</w><h>150</h></coordinates><panel_attributes>lt=&lt;.</panel_attributes><additional_attributes>13;10;10;140</additional_attributes></element><element><id>Relation</id><coordinates><x>61</x><y>387</y><w>308</w><h>70</h></coordinates><panel_attributes>lt=&lt;-
+m1=*
+- pedidosPorCodigo</panel_attributes><additional_attributes>219;35;89;35</additional_attributes></element><element><id>Relation</id><coordinates><x>-14</x><y>460</y><w>204</w><h>175</h></coordinates><panel_attributes>lt=&lt;-
+m1=0..1
+- direccion</panel_attributes><additional_attributes>103;140;100;10</additional_attributes></element><element><id>Relation</id><coordinates><x>132</x><y>460</y><w>268</w><h>167</h></coordinates><panel_attributes>lt=&lt;-
+m1=0..1
+- categoria</panel_attributes><additional_attributes>208;132;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>268</x><y>760</y><w>204</w><h>80</h></coordinates><panel_attributes>lt=&lt;-
+m1=0..1
+- siguiente</panel_attributes><additional_attributes>62;35;102;35;102;65;62;65</additional_attributes></element><element><id>Relation</id><coordinates><x>-6</x><y>250</y><w>188</w><h>185</h></coordinates><panel_attributes>lt=&lt;-
+m1=*
+- clientes</panel_attributes><additional_attributes>92;150;95;10</additional_attributes></element><element><id>Relation</id><coordinates><x>247</x><y>460</y><w>322</w><h>165</h></coordinates><panel_attributes>lt=&lt;-
+m1=0..1
+- categoriaAplicada</panel_attributes><additional_attributes>162;130;159;10</additional_attributes></element><element><id>Relation</id><coordinates><x>520</x><y>396</y><w>178</w><h>70</h></coordinates><panel_attributes>lt=&lt;-
+m1=*
+- lotes</panel_attributes><additional_attributes>140;35;10;37</additional_attributes></element><element><id>Relation</id><coordinates><x>90</x><y>400</y><w>212</w><h>96</h></coordinates><panel_attributes>lt=&lt;-
+m1=0..1
+cbase=d
+cpos=0,18
+- cliente</panel_attributes><additional_attributes>60;48;190;48</additional_attributes></element></diagram>

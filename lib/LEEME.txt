@@ -1,0 +1,5 @@
+javaparser-core-3.28.2.jar
+--------------------------
+Usado sólo por windows/compilar-sin-maven.bat (con Maven la dependencia se descarga sola).
+Compilado a partir del código fuente oficial del tag javaparser-parent-3.28.2
+(https://github.com/javaparser/javaparser), licencia Apache 2.0 / LGPL 3.0.

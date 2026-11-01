@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Java2UML</title>
+<meta name="description" content="Generá diagramas de clases UML (.uxf) para UMLetino a partir de código Java.">
+<style>
+  :root {
+    --bg: #f6f5f1; --panel: #ffffff; --ink: #1d1d1b; --muted: #6b6a64; --line: #d9d6cc;
+    --accent: #1f5f8b; --accent-ink: #ffffff; --accent-soft: #e4eef5; --ok: #2f7d4f; --err: #a33a2c;
+    --mono: ui-monospace, "Cascadia Mono", Consolas, "Liberation Mono", monospace;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #161614; --panel: #1f1f1c; --ink: #ecebe6; --muted: #a09e95; --line: #3a3934;
+      --accent: #6aa9d6; --accent-ink: #0d1b26; --accent-soft: #1d2c37; --ok: #6cc08e; --err: #e58b7d;
+    }
+  }
+  * { box-sizing: border-box; }
+  a { color: var(--accent); }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.5 var(--sans); }
+  main { max-width: 820px; margin: 0 auto; padding: 32px 16px 64px; }
+  header h1 { font-size: 30px; margin: 0; letter-spacing: -0.5px; }
+  header h1 span { font-family: var(--mono); font-size: 0.75em; color: var(--accent); }
+  header p { margin: 4px 0 0; color: var(--muted); }
+  section { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 20px; margin-top: 20px; }
+  h2 { font-size: 15px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin: 0 0 12px; }
+  h2 b { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%;
+         background: var(--accent); color: var(--accent-ink); font-size: 12px; margin-right: 8px; letter-spacing: 0; }
+  .drop { border: 2px dashed var(--line); border-radius: 10px; padding: 32px 16px; text-align: center; cursor: pointer;
+          transition: border-color .15s, background .15s; }
+  .drop:hover, .drop.over { border-color: var(--accent); background: var(--accent-soft); }
+  .drop strong { display: block; font-size: 18px; }
+  .drop small { color: var(--muted); }
+  .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 12px; }
+  button, .button { font: inherit; border-radius: 8px; padding: 9px 16px; border: 1px solid var(--line);
+           background: var(--panel); color: var(--ink); cursor: pointer; text-decoration: none; display: inline-block; }
+  button.primary, .button.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 600; }
+  button:disabled { opacity: .5; cursor: default; }
+  select { font: inherit; padding: 8px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel);
+           color: var(--ink); width: 100%; }
+  label.check { display: flex; gap: 10px; align-items: center; padding: 6px 0; }
+  label.check input { width: 18px; height: 18px; accent-color: var(--accent); }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 24px; }
+  @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
+  .muted { color: var(--muted); }
+  .status { margin-top: 12px; font-size: 14px; }
+  .error { color: var(--err); white-space: pre-wrap; }
+  .stats { display: flex; flex-wrap: wrap; gap: 24px; margin: 4px 0 8px; }
+  .stats div { font-size: 13px; color: var(--muted); }
+  .stats b { display: block; font-size: 26px; color: var(--ink); font-variant-numeric: tabular-nums; }
+  details { margin-top: 12px; }
+  summary { cursor: pointer; color: var(--accent); }
+  pre { font: 12.5px/1.45 var(--mono); background: var(--bg); border: 1px solid var(--line); border-radius: 8px;
+        padding: 12px; overflow-x: auto; white-space: pre-wrap; max-height: 420px; }
+  ol.steps { margin: 12px 0 0; padding-left: 20px; color: var(--muted); font-size: 14px; }
+  .hidden { display: none; }
+  footer { margin-top: 28px; font-size: 13px; color: var(--muted); text-align: center; }
+  code { font-family: var(--mono); font-size: .9em; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Java2UML <span>.java → .uxf</span></h1>
+    <p>Diagramas de clases UML para <a href="https://www.umletino.com" target="_blank" rel="noopener">UMLetino</a>
+      a partir del código fuente Java.</p>
+  </header>
+
+  <section>
+    <h2><b>1</b>Subí el proyecto</h2>
+    <div id="drop" class="drop" tabindex="0" role="button" aria-label="Subir archivos">
+      <strong>Arrastrá acá tus archivos <code>.java</code>, la carpeta del proyecto o un <code>.zip</code></strong>
+      <small>o hacé clic para elegir archivos</small>
+    </div>
+    <input id="files" type="file" multiple accept=".java,.zip" class="hidden">
+    <input id="folder" type="file" webkitdirectory class="hidden">
+    <div class="row">
+      <button id="pickFiles" type="button">Elegir archivos…</button>
+      <button id="pickFolder" type="button">Elegir carpeta…</button>
+    </div>
+    <div id="uploadStatus" class="status muted"></div>
+  </section>
+
+  <section id="optionsSection" class="hidden">
+    <h2><b>2</b>Elegí el paquete y las opciones</h2>
+    <select id="package" aria-label="Paquete"></select>
+    <div class="grid" style="margin-top:12px">
+      <label class="check"><input type="checkbox" id="optAtributos" checked> Mostrar atributos</label>
+      <label class="check"><input type="checkbox" id="optMetodos"> Mostrar métodos y constructores</label>
+      <label class="check"><input type="checkbox" id="optDependencias" checked> Mostrar dependencias</label>
+      <label class="check"><input type="checkbox" id="optSubpaquetes"> Incluir subpaquetes</label>
+      <label class="check"><input type="checkbox" id="optExternas"> Incluir clases de otros paquetes</label>
+    </div>
+    <div class="row">
+      <button id="generate" class="primary" type="button">Generar diagrama</button>
+    </div>
+    <div id="generateStatus" class="status"></div>
+  </section>
+
+  <section id="resultSection" class="hidden">
+    <h2><b>3</b>Descargá el diagrama</h2>
+    <div class="stats">
+      <div><b id="statClases">0</b>clases</div>
+      <div><b id="statInterfaces">0</b>interfaces</div>
+      <div><b id="statEnums">0</b>enums</div>
+      <div><b id="statRelaciones">0</b>relaciones</div>
+    </div>
+    <div class="row">
+      <button id="download" class="primary" type="button">Descargar .uxf</button>
+      <button id="copy" type="button">Copiar XML</button>
+      <a class="button" href="https://www.umletino.com" target="_blank" rel="noopener">Abrir UMLetino ↗</a>
+    </div>
+    <div id="copyStatus" class="status muted"></div>
+    <ol class="steps">
+      <li>Descargá el archivo <code>.uxf</code>.</li>
+      <li>Abrí UMLetino y arrastrá el archivo sobre el área de dibujo, o usá <em>File → Import</em>.</li>
+      <li>Cada clase y cada relación se puede mover y editar.</li>
+    </ol>
+    <details>
+      <summary>Resumen del análisis</summary>
+      <pre id="summary"></pre>
+    </details>
+  </section>
+
+  <footer>Java2UML · el código se procesa en este servidor y se borra a los 30 minutos.</footer>
+</main>
+
+<script>
+(function () {
+  "use strict";
+  const MAX_BYTES = 25 * 1024 * 1024;
+  const SKIP_DIRS = new Set(["target", "build", "bin", "out", ".git", ".idea", ".settings", "node_modules", ".gradle"]);
+  const $ = (id) => document.getElementById(id);
+  let projectId = null;
+  let result = null;
+
+  // ---------- selección de archivos
+  const drop = $("drop");
+  drop.addEventListener("click", () => $("files").click());
+  drop.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); $("files").click(); } });
+  $("pickFiles").addEventListener("click", () => $("files").click());
+  $("pickFolder").addEventListener("click", () => $("folder").click());
+  $("files").addEventListener("change", (e) => upload(filterFiles([...e.target.files])));
+  $("folder").addEventListener("change", (e) => upload(filterFiles([...e.target.files])));
+  ["dragenter", "dragover"].forEach((t) => drop.addEventListener(t, (e) => { e.preventDefault(); drop.classList.add("over"); }));
+  ["dragleave", "drop"].forEach((t) => drop.addEventListener(t, () => drop.classList.remove("over")));
+  drop.addEventListener("drop", async (e) => {
+    e.preventDefault();
+    const items = [...(e.dataTransfer.items || [])];
+    const entries = items.map((i) => i.webkitGetAsEntry && i.webkitGetAsEntry()).filter(Boolean);
+    let files = [];
+    if (entries.length) {
+      for (const entry of entries) files = files.concat(await readEntry(entry));
+    } else {
+      files = [...e.dataTransfer.files];
+    }
+    upload(filterFiles(files));
+  });
+
+  function filterFiles(files) {
+    return files.filter((f) => /\.(java|zip)$/i.test(f.name) &&
+      !(f.webkitRelativePath || "").split("/").some((d) => SKIP_DIRS.has(d)));
+  }
+
+  function readEntry(entry) {
+    return new Promise((resolve) => {
+      if (entry.isFile) {
+        entry.file((f) => resolve([f]), () => resolve([]));
+      } else if (entry.isDirectory && !SKIP_DIRS.has(entry.name)) {
+        const reader = entry.createReader();
+        let all = [];
+        const next = () => reader.readEntries(async (batch) => {
+          if (!batch.length) {
+            let files = [];
+            for (const child of all) files = files.concat(await readEntry(child));
+            resolve(files);
+          } else { all = all.concat(batch); next(); }
+        }, () => resolve([]));
+        next();
+      } else {
+        resolve([]);
+      }
+    });
+  }
+
+  // ---------- 1. subir
+  async function upload(files) {
+    const status = $("uploadStatus");
+    status.className = "status muted";
+    if (!files.length) { showError(status, "No se encontraron archivos .java ni .zip."); return; }
+    const total = files.reduce((s, f) => s + f.size, 0);
+    if (total > MAX_BYTES) { showError(status, "Los archivos suman más de 25 MB. Subí sólo la carpeta src o un .zip."); return; }
+    status.textContent = "Subiendo " + files.length + " archivo(s)…";
+    $("resultSection").classList.add("hidden");
+    const form = new FormData();
+    files.forEach((f) => form.append("archivos", f, f.name));
+    try {
+      const data = await post("/api/proyecto", form);
+      projectId = data.id;
+      const select = $("package");
+      select.innerHTML = "";
+      data.paquetes.forEach((p) => {
+        const o = document.createElement("option");
+        o.value = p.nombre;
+        o.textContent = p.etiqueta + "  (" + p.archivos + (p.archivos === 1 ? " archivo)" : " archivos)");
+        if (p.nombre === data.sugerido) o.selected = true;
+        select.appendChild(o);
+      });
+      status.textContent = data.archivos + " archivo(s) .java en " + data.paquetes.length +
+        " paquete(s). Se seleccionó automáticamente el paquete con más clases.";
+      $("optionsSection").classList.remove("hidden");
+      $("generateStatus").textContent = "";
+    } catch (err) {
+      showError(status, err.message);
+    }
+  }
+
+  // ---------- 2. generar
+  $("generate").addEventListener("click", async () => {
+    const status = $("generateStatus");
+    status.className = "status muted";
+    status.textContent = "Analizando el código…";
+    $("generate").disabled = true;
+    const params = new URLSearchParams({
+      id: projectId,
+      paquete: $("package").value,
+      atributos: $("optAtributos").checked ? "1" : "0",
+      metodos: $("optMetodos").checked ? "1" : "0",
+      dependencias: $("optDependencias").checked ? "1" : "0",
+      subpaquetes: $("optSubpaquetes").checked ? "1" : "0",
+      externas: $("optExternas").checked ? "1" : "0"
+    });
+    try {
+      result = await post("/api/generar", params);
+      $("statClases").textContent = result.clases;
+      $("statInterfaces").textContent = result.interfaces;
+      $("statEnums").textContent = result.enums;
+      $("statRelaciones").textContent = result.relaciones;
+      $("summary").textContent = result.resumen;
+      $("copyStatus").textContent = "";
+      $("resultSection").classList.remove("hidden");
+      status.textContent = result.valido ? "Diagrama generado." : "Diagrama generado con advertencias de validación.";
+      $("resultSection").scrollIntoView({ behavior: "smooth", block: "start" });
+    } catch (err) {
+      showError(status, err.message);
+    } finally {
+      $("generate").disabled = false;
+    }
+  });
+
+  ["optAtributos", "optMetodos", "optDependencias", "optSubpaquetes", "optExternas", "package"].forEach((id) =>
+    $(id).addEventListener("change", () => $("resultSection").classList.add("hidden")));
+
+  // ---------- 3. salida
+  $("download").addEventListener("click", () => {
+    if (!result) return;
+    const blob = new Blob([result.uxf], { type: "application/xml" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = result.nombreArchivo;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  });
+
+  $("copy").addEventListener("click", async () => {
+    if (!result) return;
+    try {
+      await navigator.clipboard.writeText(result.uxf);
+    } catch (e) {
+      const t = document.createElement("textarea");
+      t.value = result.uxf;
+      document.body.appendChild(t);
+      t.select();
+      document.execCommand("copy");
+      t.remove();
+    }
+    $("copyStatus").textContent = "XML copiado. Podés pegarlo en un archivo de texto y guardarlo con extensión .uxf.";
+  });
+
+  async function post(url, body) {
+    const res = await fetch(url, { method: "POST", body });
+    let data;
+    try { data = await res.json(); } catch (e) { throw new Error("Respuesta inválida del servidor (" + res.status + ")."); }
+    if (!res.ok) throw new Error(data.error || ("Error " + res.status));
+    return data;
+  }
+
+  function showError(el, msg) {
+    el.className = "status error";
+    el.textContent = msg;
+  }
+})();
+</script>
+</body>
+</html>

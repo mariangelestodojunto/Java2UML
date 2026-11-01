@@ -1,0 +1,33 @@
+# --- Maven / compilación
+target/
+build/
+out/
+bin/
+*.class
+*.log
+dependency-reduced-pom.xml
+
+# --- ejecutables generados localmente (crear-exe.bat / mvn -Pexe)
+exe/
+build-exe/
+*.exe
+
+# --- IDEs
+.idea/
+*.iml
+.vscode/
+.project
+.classpath
+.settings/
+.metadata/
+nbproject/
+*.swp
+*~
+
+# --- sistema operativo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- jar compilado (se publica en GitHub Releases)
+dist/

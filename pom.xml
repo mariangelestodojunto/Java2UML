@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.umlgen</groupId>
+    <artifactId>java2uml</artifactId>
+    <version>2.4.0</version>
+    <packaging>jar</packaging>
+
+    <name>Java2UML</name>
+    <description>Generador automático de diagramas de clases UMLetino (.uxf) a partir de código Java</description>
+
+    <properties>
+        <maven.compiler.release>17</maven.compiler.release>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <!-- JavaParser 3.28.2: sintaxis de Java 8 a 25 (records, sealed, pattern matching, text blocks...) -->
+        <javaparser.version>3.28.2</javaparser.version>
+        <junit.version>5.10.2</junit.version>
+        <main.class>com.umlgen.app.App</main.class>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.github.javaparser</groupId>
+            <artifactId>javaparser-core</artifactId>
+            <version>${javaparser.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <finalName>java2uml</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.13.0</version>
+                <configuration>
+                    <release>${maven.compiler.release}</release>
+                    <encoding>UTF-8</encoding>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.2.5</version>
+            </plugin>
+
+            <!-- Jar ejecutable con todas las dependencias (target/java2uml.jar) -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.5.3</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals><goal>shade</goal></goals>
+                        <configuration>
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>${main.class}</mainClass>
+                                </transformer>
+                            </transformers>
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                        <exclude>module-info.class</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <!-- mvn package -Pexe  → genera target/Java2UML.exe (requiere Java 17+ instalado en la PC) -->
+        <profile>
+            <id>exe</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.akathist.maven.plugins.launch4j</groupId>
+                        <artifactId>launch4j-maven-plugin</artifactId>
+                        <version>2.5.1</version>
+                        <executions>
+                            <execution>
+                                <id>l4j-gui</id>
+                                <phase>package</phase>
+                                <goals><goal>launch4j</goal></goals>
+                                <configuration>
+                                    <headerType>gui</headerType>
+                                    <outfile>${project.build.directory}/Java2UML.exe</outfile>
+                                    <jar>${project.build.directory}/java2uml.jar</jar>
+                                    <errTitle>Java2UML</errTitle>
+                                    <classPath>
+                                        <mainClass>${main.class}</mainClass>
+                                    </classPath>
+                                    <jre>
+                                        <path>jre;%JAVA_HOME%;%PATH%</path>
+                                        <minVersion>17</minVersion>
+                                    </jre>
+                                    <versionInfo>
+                                        <fileVersion>2.0.0.0</fileVersion>
+                                        <txtFileVersion>2.0.0</txtFileVersion>
+                                        <fileDescription>Generador de diagramas UMLetino desde Java</fileDescription>
+                                        <productVersion>2.0.0.0</productVersion>
+                                        <txtProductVersion>2.0.0</txtProductVersion>
+                                        <productName>Java2UML</productName>
+                                        <internalName>java2uml</internalName>
+                                        <originalFilename>Java2UML.exe</originalFilename>
+                                        <copyright>Uso libre</copyright>
+                                    </versionInfo>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+</project>

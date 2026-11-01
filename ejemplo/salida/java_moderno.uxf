@@ -1,0 +1,38 @@
+<diagram program="umletino" version="15.1"><zoom_level>10</zoom_level><element><id>UMLClass</id><coordinates><x>1020</x><y>20</y><w>190</w><h>100</h></coordinates><panel_attributes>Cliente
+--
+- nombre: String
+- email: String
+--
++ Cliente(String, String)</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>380</x><y>230</y><w>140</w><h>100</h></coordinates><panel_attributes>Cuadrado
+--
+- lado: double
+--
++ Cuadrado(double)
++ area(): double</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>390</x><y>30</y><w>130</w><h>80</h></coordinates><panel_attributes>&lt;&lt;interface&gt;&gt;
+Figura
+--
+--
+/+ area(): double/</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>650</x><y>30</y><w>240</w><h>80</h></coordinates><panel_attributes>Pedido
+--
+--
++ Pedido(Cliente, List&lt;Producto&gt;)
++ total(): double</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>20</x><y>20</y><w>230</w><h>100</h></coordinates><panel_attributes>Calculadora
+--
+_- AYUDA: String_
+--
+_+ describir(Object): String_
++ sumar(Object, Object): double</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>670</x><y>230</y><w>200</w><h>100</h></coordinates><panel_attributes>Producto
+--
+- descripcion: String
+- precio: double
+--
++ Producto(String, double)</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>70</x><y>230</y><w>140</w><h>100</h></coordinates><panel_attributes>Circulo
+--
+- radio: double
+--
++ Circulo(double)
++ area(): double</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>441</x><y>100</y><w>23</w><h>140</h></coordinates><panel_attributes>lt=&lt;.</panel_attributes><additional_attributes>13;10;10;130</additional_attributes></element><element><id>Relation</id><coordinates><x>200</x><y>100</y><w>205</w><h>143</h></coordinates><panel_attributes>lt=&lt;.</panel_attributes><additional_attributes>195;10;10;133</additional_attributes></element><element><id>Relation</id><coordinates><x>868</x><y>35</y><w>212</w><h>70</h></coordinates><panel_attributes>lt=&lt;-
+m1=0..1
+- cliente</panel_attributes><additional_attributes>152;35;22;35</additional_attributes></element><element><id>Relation</id><coordinates><x>668</x><y>100</y><w>204</w><h>165</h></coordinates><panel_attributes>lt=&lt;-
+m1=*
+- productos</panel_attributes><additional_attributes>102;130;102;10</additional_attributes></element><element><id>Relation</id><coordinates><x>126</x><y>110</y><w>23</w><h>130</h></coordinates><panel_attributes>lt=&lt;.</panel_attributes><additional_attributes>13;120;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>240</x><y>60</y><w>160</w><h>20</h></coordinates><panel_attributes>lt=&lt;.</panel_attributes><additional_attributes>150;10;10;10</additional_attributes></element></diagram>

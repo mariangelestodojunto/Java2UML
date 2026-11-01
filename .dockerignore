@@ -1,0 +1,11 @@
+target/
+build/
+exe/
+build-exe/
+dist/
+.git/
+.idea/
+.vscode/
+*.iml
+herramientas/
+windows/
