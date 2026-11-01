@@ -18,6 +18,8 @@ public final class DiagramOptions {
     public boolean excludeRunnerClasses = true;
     /** Omitir la dependencia A → B si A ya llega a B navegando sus asociaciones (A → X → B). */
     public boolean omitNavigableDependencies = true;
+    /** No mostrar getters y setters simples (sólo devuelven o asignan un atributo). */
+    public boolean hideSimpleAccessors = true;
     /** No mostrar los constructores de las clases de servicio (sólo sus operaciones). */
     public boolean hideServiceConstructors = true;
     /** Usar la disposición por capas (jerarquía vertical) en lugar de la cuadrícula 2D. */
@@ -39,6 +41,7 @@ public final class DiagramOptions {
         o.excludeTestSources = excludeTestSources;
         o.excludeRunnerClasses = excludeRunnerClasses;
         o.hideServiceConstructors = hideServiceConstructors;
+        o.hideSimpleAccessors = hideSimpleAccessors;
         o.layeredLayout = layeredLayout;
         o.omitNavigableDependencies = omitNavigableDependencies;
         return o;

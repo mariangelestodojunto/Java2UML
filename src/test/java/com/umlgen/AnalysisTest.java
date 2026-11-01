@@ -214,6 +214,35 @@ class AnalysisTest {
         assertTrue(d.report().omitted().stream().anyMatch(o -> o.startsWith("Test (clase de ejecución")));
     }
 
+    /** Multiplicidad indicada con un comentario: tiene prioridad sobre la regla automática. */
+    @Test
+    void marcaDeMultiplicidadEnElCodigo() throws Exception {
+        java.nio.file.Path dir = java.nio.file.Files.createTempDirectory("marcas");
+        java.nio.file.Path p = java.nio.file.Files.createDirectories(dir.resolve("src/m"));
+        java.nio.file.Files.writeString(p.resolve("Fecha.java"), "package m; public class Fecha {}");
+        java.nio.file.Files.writeString(p.resolve("Plan.java"), "package m; public enum Plan { A, B }");
+        java.nio.file.Files.writeString(p.resolve("Socio.java"), String.join("\n",
+                "package m;",
+                "import java.util.List;",
+                "public class Socio {",
+                "  private Fecha alta;          // 1",
+                "  private Fecha baja;          // 0..1",
+                "  // 1",
+                "  private Plan plan;",
+                "  private List<Fecha> pagos;   // 1..*",
+                "  private Fecha nacimiento;    // comentario común, no es una marca",
+                "  public Socio(Fecha alta, Fecha nacimiento) { this.alta = null; this.nacimiento = nacimiento; }",
+                "  public void setPlan(Plan p) { if (p != null) { plan = p; } }",
+                "}"));
+        GeneratedDiagram d = TestSupport.generate(dir, "m", new DiagramOptions());
+        Set<String> rel = TestSupport.relations(d);
+        assertTrue(rel.contains("ASSOCIATION Socio->Fecha [- alta] (1)"), "marca al final de la línea: " + rel);
+        assertTrue(rel.contains("ASSOCIATION Socio->Fecha [- baja] (0..1)"), rel.toString());
+        assertTrue(rel.contains("ASSOCIATION Socio->Plan [- plan] (1)"), "marca en la línea anterior: " + rel);
+        assertTrue(rel.contains("ASSOCIATION Socio->Fecha [- pagos] (1..*)"), "colección con marca: " + rel);
+        assertTrue(rel.contains("ASSOCIATION Socio->Fecha [- nacimiento] (1)"), "sin marca válida: regla automática");
+    }
+
     @Test
     void opcionesParaVerClasesDeEjecucionYTodasLasDependencias() throws Exception {
         DiagramOptions o = new DiagramOptions();

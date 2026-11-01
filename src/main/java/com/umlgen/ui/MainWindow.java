@@ -66,6 +66,7 @@ public final class MainWindow extends JFrame {
     private final JCheckBox showMethods = new JCheckBox("Mostrar métodos", false);
     private final JCheckBox showConstructors = new JCheckBox("Mostrar constructores", false);
     private final JCheckBox showParamNames = new JCheckBox("Mostrar nombres de parámetros", false);
+    private final JCheckBox hideAccessors = new JCheckBox("Ocultar getters y setters simples", true);
     private final JCheckBox includeInterfaces = new JCheckBox("Incluir interfaces", true);
     private final JCheckBox includeEnums = new JCheckBox("Incluir enumeraciones", true);
     private final JCheckBox showDependencies = new JCheckBox("Mostrar dependencias", true);
@@ -136,9 +137,10 @@ public final class MainWindow extends JFrame {
         optionsPanel.setLayout(new BoxLayout(optionsPanel, BoxLayout.Y_AXIS));
         optionsPanel.setBorder(BorderFactory.createTitledBorder("3. Opciones del diagrama"));
         for (JCheckBox b : new JCheckBox[]{showAttributes, showMethods, showConstructors, showParamNames,
-                includeInterfaces, includeEnums, showDependencies, includeExternal}) {
+                hideAccessors, includeInterfaces, includeEnums, showDependencies, includeExternal}) {
             optionsPanel.add(b);
         }
+        hideAccessors.setToolTipText("getX() que sólo devuelve un atributo y setX(valor) que sólo lo asigna; los que validan se muestran");
         optionsPanel.add(Box.createVerticalStrut(8));
         JLabel advanced = new JLabel("Avanzadas:");
         advanced.setFont(advanced.getFont().deriveFont(Font.ITALIC));
@@ -235,7 +237,7 @@ public final class MainWindow extends JFrame {
             updateButtons();
         });
         for (JCheckBox b : new JCheckBox[]{subpackagesBox, showAttributes, showMethods, showConstructors,
-                showParamNames, includeInterfaces, includeEnums, showDependencies, includeExternal, excludeTests, excludeRunners, omitNavigable, hideServiceCtors, layered}) {
+                showParamNames, hideAccessors, includeInterfaces, includeEnums, showDependencies, includeExternal, excludeTests, excludeRunners, omitNavigable, hideServiceCtors, layered}) {
             b.addActionListener(e -> invalidateDiagram());
         }
     }
@@ -468,7 +470,7 @@ public final class MainWindow extends JFrame {
                     if (!v.warnings().isEmpty()) {
                         msg.append("\nAvisos de diseño: ").append(v.warnings().size()).append('\n');
                     }
-                    msg.append("\nPara verlo: abrí https://www.umletino.com → File → Import… y elegí el archivo.");
+                    msg.append("\nPara verlo: abrí https://www.umletino.com/umletino.html → File → Import… y elegí el archivo.");
                     summaryArea.append("\n\n=== Exportación ===\n" + msg);
                     Object[] buttons = Desktop.isDesktopSupported() ? new Object[]{"Aceptar", "Abrir carpeta"} : new Object[]{"Aceptar"};
                     int choice = JOptionPane.showOptionDialog(MainWindow.this, msg.toString(), "Exportación",
@@ -500,6 +502,7 @@ public final class MainWindow extends JFrame {
         o.showMethods = showMethods.isSelected();
         o.showConstructors = showConstructors.isSelected();
         o.showParameterNames = showParamNames.isSelected();
+        o.hideSimpleAccessors = hideAccessors.isSelected();
         o.includeInterfaces = includeInterfaces.isSelected();
         o.includeEnums = includeEnums.isSelected();
         o.showDependencies = showDependencies.isSelected();

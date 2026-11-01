@@ -78,7 +78,7 @@ public final class PanelTextFormatter {
         }
         if (options.showMethods) {
             for (UmlOperation op : c.operations()) {
-                if (!op.isConstructor()) {
+                if (!op.isConstructor() && !(options.hideSimpleAccessors && op.isSimpleAccessor())) {
                     operations.add(formatOperation(op));
                 }
             }

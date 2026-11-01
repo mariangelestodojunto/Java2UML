@@ -68,7 +68,7 @@ public final class JavaSourceParser {
             String source = ProjectScanner.readSource(file.path());
             ParseResult<CompilationUnit> r = parser.parse(source);
             if (r.isSuccessful() && r.getResult().isPresent()) {
-                return new ParsedSource(file, r.getResult().get());
+                return new ParsedSource(file, r.getResult().get(), source);
             }
             String msg = r.getProblems().isEmpty() ? "error desconocido" : describe(r.getProblems().get(0));
             report.addParseError(name + ": error de sintaxis — " + msg + " (archivo omitido)");

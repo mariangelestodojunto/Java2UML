@@ -1,7 +1,7 @@
 # Java2UML
 
 Genera **diagramas de clases UML** a partir del **código fuente Java** y los guarda como archivo
-**`.uxf` editable en [UMLetino](https://www.umletino.com)**.
+**`.uxf` editable en [UMLetino](https://www.umletino.com/umletino.html)**.
 
 No hace falta Eclipse ni compilar el proyecto: se leen directamente los archivos `.java`
 (Java 8 a 25: records, sealed, pattern matching, text blocks, etc.).
@@ -59,6 +59,7 @@ java -jar java2uml.jar --cli <carpetaProyecto> <paquete> <salida.uxf> [opciones]
 | `--subpaquetes` | incluye los subpaquetes |
 | `--metodos` / `--constructores` | muestra métodos / constructores |
 | `--parametros` | muestra los nombres de los parámetros |
+| `--accesores` | muestra también los getters y setters simples |
 | `--externas` | incluye clases del proyecto de otros paquetes |
 | `--sin-atributos` / `--sin-dependencias` | oculta atributos / dependencias |
 | `--sin-interfaces` / `--sin-enums` | omite interfaces / enumeraciones |
@@ -78,6 +79,7 @@ Usá `.` como paquete para el paquete por defecto.
 | Mostrar métodos | ✘ |
 | Mostrar constructores | ✘ |
 | Mostrar nombres de parámetros | ✘ |
+| Ocultar getters y setters simples | ✔ |
 | Incluir interfaces / enumeraciones | ✔ |
 | Mostrar dependencias | ✔ |
 | Mostrar clases de otros paquetes | ✘ |
@@ -88,7 +90,7 @@ Usá `.` como paquete para el paquete por defecto.
 
 ### Abrir el resultado en UMLetino
 
-Abrí https://www.umletino.com y **arrastrá el `.uxf` sobre el área de dibujo** (o *File → Import*).
+Abrí https://www.umletino.com/umletino.html y **arrastrá el `.uxf` sobre el área de dibujo** (o *File → Import*).
 Cada clase y cada relación es un elemento independiente: se pueden mover y editar.
 
 ### Compilar desde el código fuente
@@ -128,6 +130,8 @@ _+ DIAS_MAXIMOS: int = 14_        - anio: int                 _+ NOVELA_
 - Constantes de un enum subrayadas: `_+ NOVELA_`.
 - Operaciones: constructores primero, luego métodos. Parámetros sólo con tipos
   (`+ setNombre(String): void`) y `: void` explícito. Los métodos abstractos van en itálica.
+- Los getters y setters simples (`getX()` que sólo devuelve un atributo, `setX(valor)` que sólo lo
+  asigna) se ocultan por defecto. Los que validan o calculan algo se muestran.
 - Las clases de servicio (usan otras clases sólo por parámetro y ninguna las referencia) muestran sus
   operaciones sin constructores.
 - Visibilidad: `+` public, `-` private, `#` protected, `~` package.
@@ -145,7 +149,19 @@ Se usan sólo dos tipos de flecha, ambas con punta abierta:
 | Implementación | `implements` | `lt=<.` |
 | Dependencia | parámetro, retorno, variable local, `new` o llamada estática, sin atributo | `lt=<.` |
 
-**Multiplicidad de una referencia simple:**
+**Multiplicidad indicada en el código:** si el enunciado define la multiplicidad, escribila como
+comentario en el atributo (al final de la línea o en la línea anterior). Tiene prioridad sobre la regla
+automática:
+
+```java
+private Fecha fechaFabricacion;   // 1
+private Fecha fechaUltimaVTV;     // 0..1
+private ArrayList<Persona> personas;   // 1..*
+```
+
+Valores válidos: `1`, `0..1`, `*`, `0..*`, `1..*` o cualquier `n..m`. Otros comentarios se ignoran.
+
+**Multiplicidad automática de una referencia simple** (cuando no hay marca):
 
 - `m1=1` si el atributo es `final`, o si se le asigna un valor (aunque venga por parámetro) al declararlo o
   en algún constructor **y ningún método lo vuelve a asignar**.

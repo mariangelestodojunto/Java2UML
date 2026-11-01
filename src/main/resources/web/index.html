@@ -65,7 +65,7 @@
 <main>
   <header>
     <h1>Java2UML <span>.java → .uxf</span></h1>
-    <p>Diagramas de clases UML para <a href="https://www.umletino.com" target="_blank" rel="noopener">UMLetino</a>
+    <p>Diagramas de clases UML para <a href="https://www.umletino.com/umletino.html" target="_blank" rel="noopener">UMLetino</a>
       a partir del código fuente Java.</p>
   </header>
 
@@ -90,6 +90,7 @@
     <div class="grid" style="margin-top:12px">
       <label class="check"><input type="checkbox" id="optAtributos" checked> Mostrar atributos</label>
       <label class="check"><input type="checkbox" id="optMetodos"> Mostrar métodos y constructores</label>
+      <label class="check"><input type="checkbox" id="optAccesores" checked> Ocultar getters y setters simples</label>
       <label class="check"><input type="checkbox" id="optDependencias" checked> Mostrar dependencias</label>
       <label class="check"><input type="checkbox" id="optSubpaquetes"> Incluir subpaquetes</label>
       <label class="check"><input type="checkbox" id="optExternas"> Incluir clases de otros paquetes</label>
@@ -111,7 +112,7 @@
     <div class="row">
       <button id="download" class="primary" type="button">Descargar .uxf</button>
       <button id="copy" type="button">Copiar XML</button>
-      <a class="button" href="https://www.umletino.com" target="_blank" rel="noopener">Abrir UMLetino ↗</a>
+      <a class="button" href="https://www.umletino.com/umletino.html" target="_blank" rel="noopener">Abrir UMLetino ↗</a>
     </div>
     <div id="copyStatus" class="status muted"></div>
     <ol class="steps">
@@ -231,7 +232,8 @@
       metodos: $("optMetodos").checked ? "1" : "0",
       dependencias: $("optDependencias").checked ? "1" : "0",
       subpaquetes: $("optSubpaquetes").checked ? "1" : "0",
-      externas: $("optExternas").checked ? "1" : "0"
+      externas: $("optExternas").checked ? "1" : "0",
+      ocultarAccesores: $("optAccesores").checked ? "1" : "0"
     });
     try {
       result = await post("/api/generar", params);
@@ -251,7 +253,7 @@
     }
   });
 
-  ["optAtributos", "optMetodos", "optDependencias", "optSubpaquetes", "optExternas", "package"].forEach((id) =>
+  ["optAtributos", "optMetodos", "optAccesores", "optDependencias", "optSubpaquetes", "optExternas", "package"].forEach((id) =>
     $(id).addEventListener("change", () => $("resultSection").classList.add("hidden")));
 
   // ---------- 3. salida

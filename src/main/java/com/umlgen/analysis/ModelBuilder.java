@@ -83,6 +83,9 @@ public final class ModelBuilder {
                 ext.setExternal(true);
                 return ext;
             });
+        }, td -> {
+            TypeInfo info = index.of(td);
+            return info == null ? null : info.source();
         });
 
         for (Map.Entry<TypeInfo, UmlClassifier> e : included.entrySet()) {

@@ -183,6 +183,7 @@ public final class WebServer {
         o.showDependencies = flag(form, "dependencias", true);
         o.includeSubpackages = flag(form, "subpaquetes", false);
         o.includeExternalClasses = flag(form, "externas", false);
+        o.hideSimpleAccessors = flag(form, "ocultarAccesores", true);
 
         GeneratedDiagram d = generator.generate(p.structure, pkg, o, ProgressListener.NONE);
         String xml = new UxfWriter(new PanelTextFormatter(d.options())).toXml(d.layout());

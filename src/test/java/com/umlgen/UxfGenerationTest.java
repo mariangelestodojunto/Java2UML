@@ -121,6 +121,38 @@ class UxfGenerationTest {
     }
 
     @Test
+    void gettersYSettersSimplesSeOcultan() throws Exception {
+        java.nio.file.Path dir = java.nio.file.Files.createTempDirectory("accesores");
+        java.nio.file.Path p = java.nio.file.Files.createDirectories(dir.resolve("src/a"));
+        java.nio.file.Files.writeString(p.resolve("Auto.java"), String.join("\n",
+                "package a;",
+                "public class Auto {",
+                "  private String marca;",
+                "  private boolean encendido;",
+                "  private int velocidad;",
+                "  public String getMarca() { return marca; }",
+                "  public boolean isEncendido() { return this.encendido; }",
+                "  public void setMarca(String m) { this.marca = m; }",
+                "  public boolean setVelocidad(int v) { if (v < 0) return false; velocidad = v; return true; }",
+                "  public String getDescripcion() { return marca + \" \" + velocidad; }",
+                "  public boolean estaEncendido() { return encendido; }",
+                "}"));
+        DiagramOptions o = new DiagramOptions();
+        o.showMethods = true;
+        GeneratedDiagram d = TestSupport.generate(dir, "a", o);
+        String auto = new PanelTextFormatter(o).text(TestSupport.classifier(d, "Auto"));
+        assertFalse(auto.contains("getMarca"), auto);
+        assertFalse(auto.contains("isEncendido"), auto);
+        assertFalse(auto.contains("setMarca"), auto);
+        assertTrue(auto.contains("+ setVelocidad(int): boolean"), "setter con validación se muestra");
+        assertTrue(auto.contains("+ getDescripcion(): String"), "getter que calcula se muestra");
+        assertTrue(auto.contains("+ estaEncendido(): boolean"));
+        o.hideSimpleAccessors = false;
+        assertTrue(new PanelTextFormatter(o).text(TestSupport.classifier(d, "Auto")).contains("+ getMarca(): String"),
+                "con la opción desactivada se muestran todos");
+    }
+
+    @Test
     void usarSoloUnEnumNoConvierteEnServicio() throws Exception {
         java.nio.file.Path dir = java.nio.file.Files.createTempDirectory("servicio");
         java.nio.file.Path p = java.nio.file.Files.createDirectories(dir.resolve("src/juego"));

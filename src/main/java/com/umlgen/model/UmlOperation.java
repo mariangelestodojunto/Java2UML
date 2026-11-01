@@ -11,9 +11,17 @@ public final class UmlOperation {
     private final boolean constructor;
     private final boolean isStatic;
     private final boolean isAbstract;
+    /** Getter o setter simple: sólo devuelve un atributo o sólo lo asigna. */
+    private final boolean simpleAccessor;
 
     public UmlOperation(Visibility visibility, String name, List<UmlParameter> parameters, String returnType,
                         boolean constructor, boolean isStatic, boolean isAbstract) {
+        this(visibility, name, parameters, returnType, constructor, isStatic, isAbstract, false);
+    }
+
+    public UmlOperation(Visibility visibility, String name, List<UmlParameter> parameters, String returnType,
+                        boolean constructor, boolean isStatic, boolean isAbstract, boolean simpleAccessor) {
+        this.simpleAccessor = simpleAccessor;
         this.visibility = visibility;
         this.name = name;
         this.parameters = List.copyOf(parameters);
@@ -31,4 +39,5 @@ public final class UmlOperation {
     public boolean isConstructor() { return constructor; }
     public boolean isStatic() { return isStatic; }
     public boolean isAbstract() { return isAbstract; }
+    public boolean isSimpleAccessor() { return simpleAccessor; }
 }

@@ -67,7 +67,7 @@ public final class ClassifierFactory {
                         || (inInterface && md.getBody().isEmpty() && !md.isStatic() && !md.isDefault()
                         && !md.isPrivate());
                 c.operations().add(new UmlOperation(v, md.getNameAsString(), parameters(md.getParameters()),
-                        md.getType().asString(), false, md.isStatic(), isAbstract));
+                        md.getType().asString(), false, md.isStatic(), isAbstract, isSimpleAccessor(md, fieldNames(td))));
             } else if (member instanceof ConstructorDeclaration cd) {
                 Visibility v = visibility(cd.getModifiers(), false, inEnum);
                 c.operations().add(new UmlOperation(v, cd.getNameAsString(), parameters(cd.getParameters()),
@@ -96,6 +96,65 @@ public final class ClassifierFactory {
             return text.contains("\n") || text.length() > 60 ? null : text;
         }
         return null;
+    }
+
+    /**
+     * Getter o setter simple, de los que no hace falta diagramar:
+     * <ul>
+     *   <li>getX()/isX() sin parámetros cuyo cuerpo es sólo {@code return atributo;} (o {@code return this.atributo;})</li>
+     *   <li>setX(valor) con un parámetro cuyo cuerpo es sólo {@code atributo = valor;}</li>
+     * </ul>
+     * Un setter con validaciones (p. ej. un if) o un getter que calcula algo no se considera simple.
+     */
+    static boolean isSimpleAccessor(MethodDeclaration md, java.util.Set<String> fields) {
+        String name = md.getNameAsString();
+        java.util.Optional<com.github.javaparser.ast.stmt.BlockStmt> body = md.getBody();
+        if (body.isEmpty() || body.get().getStatements().size() != 1) {
+            return false;
+        }
+        com.github.javaparser.ast.stmt.Statement only = body.get().getStatement(0);
+        boolean getterName = (name.length() > 3 && name.startsWith("get") && Character.isUpperCase(name.charAt(3)))
+                || (name.length() > 2 && name.startsWith("is") && Character.isUpperCase(name.charAt(2)));
+        if (getterName && md.getParameters().isEmpty() && only instanceof com.github.javaparser.ast.stmt.ReturnStmt ret) {
+            return ret.getExpression().map(e -> fieldReferenced(e, fields)).orElse(false);
+        }
+        boolean setterName = name.length() > 3 && name.startsWith("set") && Character.isUpperCase(name.charAt(3));
+        if (setterName && md.getParameters().size() == 1
+                && only instanceof com.github.javaparser.ast.stmt.ExpressionStmt es
+                && es.getExpression() instanceof com.github.javaparser.ast.expr.AssignExpr assign
+                && assign.getOperator() == com.github.javaparser.ast.expr.AssignExpr.Operator.ASSIGN) {
+            String param = md.getParameter(0).getNameAsString();
+            return fieldReferenced(assign.getTarget(), fields)
+                    && assign.getValue() instanceof com.github.javaparser.ast.expr.NameExpr value
+                    && value.getNameAsString().equals(param);
+        }
+        return false;
+    }
+
+    private static boolean fieldReferenced(Expression e, java.util.Set<String> fields) {
+        if (e instanceof com.github.javaparser.ast.expr.NameExpr n) {
+            return fields.contains(n.getNameAsString());
+        }
+        return e instanceof com.github.javaparser.ast.expr.FieldAccessExpr f
+                && f.getScope() instanceof com.github.javaparser.ast.expr.ThisExpr
+                && fields.contains(f.getNameAsString());
+    }
+
+    private static java.util.Set<String> fieldNames(TypeDeclaration<?> td) {
+        java.util.Set<String> names = new java.util.HashSet<>();
+        for (BodyDeclaration<?> m : td.getMembers()) {
+            if (m instanceof FieldDeclaration fd) {
+                fd.getVariables().forEach(v -> names.add(v.getNameAsString()));
+            }
+        }
+        if (td.getClass().getSimpleName().equals("RecordDeclaration")) {
+            td.findAll(Parameter.class).forEach(p -> {
+                if (p.getParentNode().filter(n -> n == td).isPresent()) {
+                    names.add(p.getNameAsString());
+                }
+            });
+        }
+        return names;
     }
 
     static ClassifierKind kindOf(TypeDeclaration<?> td) {

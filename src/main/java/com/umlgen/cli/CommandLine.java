@@ -15,7 +15,7 @@ import java.nio.file.Path;
  * java -jar java2uml.jar --cli &lt;carpetaProyecto&gt; &lt;paquete&gt; &lt;salida.uxf&gt; [opciones]
  *   --subpaquetes --metodos --constructores --parametros --externas --sin-dependencias
  *   --sin-interfaces --sin-enums --sin-atributos --incluir-tests --incluir-ejecucion --todas-las-dependencias
- *   --capas --constructores-servicio
+ *   --capas --constructores-servicio --accesores
  * java -jar java2uml.jar --cli &lt;carpetaProyecto&gt; --listar     (muestra los paquetes)
  * </pre>
  * Use "." como paquete para el paquete por defecto.
@@ -55,6 +55,7 @@ public final class CommandLine {
                     case "--incluir-ejecucion" -> o.excludeRunnerClasses = false;
                     case "--todas-las-dependencias" -> o.omitNavigableDependencies = false;
                     case "--capas" -> o.layeredLayout = true;
+                    case "--accesores" -> o.hideSimpleAccessors = false;
                     case "--constructores-servicio" -> o.hideServiceConstructors = false;
                     default -> System.err.println("Opción desconocida ignorada: " + args[i]);
                 }
